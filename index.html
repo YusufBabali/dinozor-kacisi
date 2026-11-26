@@ -4,6 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Dinozor Kaçışı</title>
+<meta name="description" content="Yusuf Dayı, Arif ve Asım dinozorlardan kaçıyor! Zıpla, eğil, poğaça topla. Tarayıcıda ücretsiz oyna, kurulum yok.">
+<meta name="theme-color" content="#2f6b2f">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="artifact-thumbnail" href="og.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="Dinozor Kaçışı">
+<meta property="og:description" content="Yusuf Dayı, Arif ve Asım dinozorlardan kaçıyor! Zıpla, eğil, poğaça topla.">
+<meta property="og:url" content="https://yusufbabali.github.io/dinozor-kacisi/">
+<meta property="og:image" content="https://yusufbabali.github.io/dinozor-kacisi/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://yusufbabali.github.io/dinozor-kacisi/og.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dinozor Kaçışı">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
@@ -60,9 +79,19 @@ h1 span{color:var(--acc);-webkit-text-stroke:1.5px var(--frame);paint-order:stro
 .hint b{color:var(--ink)}
 .kbd{display:inline-block;border:2px solid currentColor;border-radius:6px;padding:0 6px;font-size:13px;line-height:20px}
 .rules{width:100%;margin:-6px 0 0;color:var(--soft);font-size:14px;font-weight:700}
+.tools{display:flex;gap:10px;flex:none}
+.tools [hidden]{display:none}
+.cb{font:800 13px/1 Nunito,system-ui,sans-serif;background:#1d1a24;color:#fff6e0;border-radius:999px;padding:4px 9px;margin-top:4px}
+.cb:empty{display:none}
+.stats{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 6px}
+.stats span{background:#f3e4c4;border:2px solid #1d1a24;border-radius:999px;padding:3px 10px;font:700 14px/1.2 Nunito,system-ui,sans-serif;white-space:nowrap}
+.stats b{font-family:"Baloo 2",system-ui,sans-serif;font-size:16px}
+.tip{margin:10px 0 0!important;font-size:14px!important}
+.kbdhint{font-size:13px!important;margin:8px 0 0!important}
+#ovPause{background:rgb(16 30 20/.45)}
 .touch{display:none}
 @media(pointer:coarse){.pad{display:grid}.touch{display:inline}.keys{display:none}}
-@media(max-width:600px){.hint{font-size:14px}.card p{font-size:14px}.ch small{font-size:13px}}
+@media(max-width:600px){.hint{font-size:14px}.card p{font-size:14px}.ch small{font-size:13px}h1{font-size:clamp(22px,6.6vw,30px);white-space:nowrap}.tools{gap:6px}.tools .icon{width:42px;min-height:42px}}
 @media(prefers-reduced-motion:reduce){.btn,.ch{transition:none}}
 </style>
 </head>
@@ -70,9 +99,13 @@ h1 span{color:var(--acc);-webkit-text-stroke:1.5px var(--frame);paint-order:stro
 <main>
   <header>
     <h1>Dinozor <span>Kaçışı</span></h1>
+    <div class="tools">
+    <button class="btn icon" id="pauseBtn" aria-label="Duraklat" hidden><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
+    <button class="btn icon" id="fsBtn" aria-label="Tam ekran" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="btn icon" id="mute" aria-label="Sesi kapat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path id="cross" d="M17 9l5 6M22 9l-5 6" style="display:none"/></svg>
     </button>
+    </div>
   </header>
   <div id="wrap">
     <canvas id="cv"></canvas>
@@ -81,21 +114,34 @@ h1 span{color:var(--acc);-webkit-text-stroke:1.5px var(--frame);paint-order:stro
         <h2>Kim kaçıyor?</h2>
         <p>Birini seç! İlk çarpmada tökezlersin, ikincisinde dinozor yakalar. Her 1000 puanda yeni bir dinozor gelir.</p>
         <div class="chars">
-          <button class="ch" data-c="dayi"><canvas width="220" height="220"></canvas><b>Yusuf Dayı</b><small>Fırlar, tökezleyince hemen toparlanır</small></button>
-          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaçasını yer, sınırsız poğaça atar</small></button>
-          <button class="ch" data-c="asim"><canvas width="220" height="220"></canvas><b>Asım</b><small>Bisikletle kaçar, roketle 2. kez zıplar</small></button>
+          <button class="ch" data-c="dayi"><canvas width="220" height="220"></canvas><b>Yusuf Dayı</b><small>Fırlar, tökezleyince hemen toparlanır</small><span class="cb" data-best="dayi"></span></button>
+          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaçasını yer, sınırsız poğaça atar</small><span class="cb" data-best="dayiArif"></span></button>
+          <button class="ch" data-c="asim"><canvas width="220" height="220"></canvas><b>Asım</b><small>Bisikletle kaçar, roketle 2. kez zıplar</small><span class="cb" data-best="asim"></span></button>
         </div>
+        <p class="kbdhint keys">Klavyeden <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> ile de seçebilirsin.</p>
       </div>
     </div>
     <div class="ov" id="ovOver">
-      <div class="card" style="max-width:430px">
+      <div class="card" style="max-width:450px">
         <div class="badge" id="newRec" hidden>Yeni rekor!</div>
         <h2 id="fTitle">Yakalandın!</h2>
         <div class="score" id="fScore">0</div>
-        <p id="fInfo">En iyi: 0</p>
+        <div class="stats" id="fStats"></div>
         <div class="row">
           <button class="btn go" id="again">Tekrar koş</button>
           <button class="btn" id="pick">Karakter seç</button>
+          <button class="btn" id="share">Paylaş</button>
+        </div>
+        <p class="tip" id="fTip"></p>
+      </div>
+    </div>
+    <div class="ov" id="ovPause">
+      <div class="card" style="max-width:380px">
+        <h2>Mola!</h2>
+        <p>Dinozor da soluklanıyor. Hazır olunca devam et.</p>
+        <div class="row">
+          <button class="btn go" id="resume">Devam et</button>
+          <button class="btn" id="quit">Karakter seç</button>
         </div>
       </div>
     </div>
@@ -106,7 +152,7 @@ h1 span{color:var(--acc);-webkit-text-stroke:1.5px var(--frame);paint-order:stro
     <button class="pb jump" id="bJump" aria-label="Zıpla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>Zıpla</button>
   </div>
   <div class="hint">
-    <span class="keys"><b>Zıpla:</b> <span class="kbd">Boşluk</span> / <span class="kbd">↑</span> · <b>Eğil:</b> <span class="kbd">↓</span> · <b>Özel güç:</b> <span class="kbd">X</span> / <span class="kbd">→</span></span>
+    <span class="keys"><b>Zıpla:</b> <span class="kbd">Boşluk</span> / <span class="kbd">↑</span> · <b>Eğil:</b> <span class="kbd">↓</span> · <b>Özel güç:</b> <span class="kbd">X</span> / <span class="kbd">→</span> · <b>Mola:</b> <span class="kbd">P</span></span>
     <span class="touch"><b>Zıpla:</b> ekrana dokun · basılı tut, daha yükseğe</span>
     <span id="best">En iyi: 0</span>
   </div>
@@ -627,10 +673,27 @@ function fern(x, y, s, t) {
   }
 }
 let skyGrad = null, skyFor = 0;
+const SKIES = [
+  { top: '#6cc0ee', mid: '#bfe3f0', bot: '#fbe6b4', tint: [0, 0, 0, 0] },
+  { top: '#5867b5', mid: '#f0a07a', bot: '#ffd08f', tint: [255, 110, 50, .14] },
+  { top: '#0d1a3a', mid: '#273a6e', bot: '#46557f', tint: [12, 22, 66, .42] },
+];
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const mixHex = (a, b, k) => { const A = hexRgb(a), B = hexRgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
+function skyMix(sv) { const i = sv < 1 ? 0 : 1, k = clamp(sv - i), A = SKIES[i], B = SKIES[i + 1]; return { top: mixHex(A.top, B.top, k), mid: mixHex(A.mid, B.mid, k), bot: mixHex(A.bot, B.bot, k), tint: A.tint.map((v, j) => v + (B.tint[j] - v) * k) }; }
 function background(t, cm) {
-  if (!skyGrad || skyFor !== GY) { skyGrad = X.createLinearGradient(0, 0, 0, GY); skyGrad.addColorStop(0, '#6cc0ee'); skyGrad.addColorStop(.7, '#bfe3f0'); skyGrad.addColorStop(1, '#fbe6b4'); skyFor = GY; }
+  const sv = g ? clamp(g.sky || 0, 0, 2) : 0, S = skyMix(sv), dusk = clamp(1 - Math.abs(sv - 1)), night = clamp(sv - 1);
+  skyGrad = X.createLinearGradient(0, 0, 0, GY); skyGrad.addColorStop(0, S.top); skyGrad.addColorStop(.7, S.mid); skyGrad.addColorStop(1, S.bot);
   X.fillStyle = skyGrad; X.fillRect(-60, -60, LW + 120, GY + 80);
-  ell(LW - 170, 100, 80, 80); fill('rgba(255,244,194,.3)'); ell(LW - 170, 100, 52, 52); fill('#fff4c2');
+  if (night > 0) {
+    for (let k = 0; k < 46; k++) { const a = night * (.45 + .55 * Math.abs(Math.sin(t * (1 + HS(k, 4)) + k))); ell(HS(k, 1) * LW, 20 + HS(k, 2) * (GY - 260), 1.6 + 1.4 * HS(k, 3), 1.6 + 1.4 * HS(k, 3)); fill(`rgba(255,250,220,${a})`); }
+    X.globalAlpha = night; ell(LW - 170, 100, 64, 64); fill('rgba(255,250,220,.18)'); ell(LW - 170, 100, 40, 40); fill('#fff7d6');
+    ell(LW - 182, 92, 9, 8); fill('rgba(210,200,170,.6)'); ell(LW - 158, 112, 6, 5); fill('rgba(210,200,170,.6)'); X.globalAlpha = 1;
+  }
+  if (night < 1) {
+    const sy = 100 + 90 * dusk, sun = dusk > 0 ? mixHex('#fff4c2', '#ffb35c', dusk) : '#fff4c2';
+    X.globalAlpha = 1 - night; ell(LW - 170, sy, 80 + 20 * dusk, 80 + 20 * dusk); fill('rgba(255,236,180,.3)'); ell(LW - 170, sy, 52 + 10 * dusk, 52 + 10 * dusk); fill(sun); X.globalAlpha = 1;
+  }
   for (let k = 0; k < 6; k++) {
     const cx = ((k * 330 + 60 - cm * .03 - t * 12) % (LW + 400) + LW + 400) % (LW + 400) - 200, cy = 60 + HS(k, 2) * Math.max(100, GY - 420);
     X.fillStyle = 'rgba(255,255,255,.9)'; for (let j = 0; j < 4; j++) { ell(cx + j * 32, cy - (j === 1 || j === 2 ? 8 : 0), 36, 22); X.fill(); }
@@ -656,6 +719,12 @@ function background(t, cm) {
   X.lineTo(LW + 60, GY + 4); X.lineTo(-60, GY + 4); X.closePath(); fill('#6fae3e');
   k0 = Math.floor((cm - 100) / 70);
   for (let k = k0; k < k0 + Math.ceil(LW / 70) + 4; k++) { const sx = k * 70 + HS(k, 1) * 50 - cm; ell(sx, GY + 16 + HS(k, 2) * (LH - GY - 30), 6 + 5 * HS(k, 3), 4 + 2 * HS(k, 4)); fill(HS(k, 5) < .5 ? '#a98656' : '#e3c891'); }
+  if (S.tint[3] > .005) { X.fillStyle = `rgba(${S.tint[0] | 0},${S.tint[1] | 0},${S.tint[2] | 0},${S.tint[3]})`; X.fillRect(-60, -60, LW + 120, LH + 120); }
+  if (night > 0) for (let k = 0; k < 14; k++) {
+    const fx = ((HS(k, 6) * (LW + 200) - cm * .5 + Math.sin(t * .7 + k) * 40) % (LW + 200) + LW + 200) % (LW + 200) - 100, fy = GY - 40 - HS(k, 7) * 150 + Math.sin(t * 1.3 + k * 2) * 14;
+    const a = night * (.4 + .6 * Math.abs(Math.sin(t * 2.2 + k * 1.7)));
+    ell(fx, fy, 9, 9); fill(`rgba(255,240,120,${.25 * a})`); ell(fx, fy, 3, 3); fill(`rgba(255,250,170,${a})`);
+  }
 }
 function foreground(t, cm) {
   const k0 = Math.floor((cm * 1.35 - 300) / 620);
@@ -719,6 +788,9 @@ const sfx = {
   nope() { if (!audio()) return; tone('square', 220, 150, AC.currentTime, .14, .07, master, 1200); },
   rocket() { if (!audio()) return; const t = AC.currentTime; noiseHit(t, .65, .4, 'bandpass', 800); noiseHit(t, .4, .22, 'highpass', 4500); tone('sawtooth', 110, 520, t, .5, .08, master, 1600); },
   nom() { if (!audio()) return; noiseHit(AC.currentTime, .06, .07, 'bandpass', 3200); },
+  tick(hi) { if (!audio()) return; tone('square', hi ? 880 : 520, 0, AC.currentTime, hi ? .32 : .14, .12, master, 2600); },
+  mile() { if (!audio()) return; const t = AC.currentTime; tone('square', 784, 0, t, .09, .08, master, 3000); tone('square', 1175, 0, t + .08, .16, .08, master, 3000); },
+  record() { if (!audio()) return; const t = AC.currentTime; [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone('triangle', f, 0, t + i * .09, .22, .16)); },
 };
 const BEAT = 60 / 140, S16 = BEAT / 4, ROOTS = [38, 38, 34, 36], KEYS = [0, 3, -2], mf = m => 440 * 2 ** ((m - 69) / 12);
 function schedule() {
@@ -757,14 +829,22 @@ const CHARS = {
   asim: { name: 'Asım', kind: 'kid', bike: true, ab: 'rocket', abName: 'Roket', s: .56, w: 70, h: 118, dh: 82, rec: 6, rate: 2.9, back: 34 },
 };
 let state = 'select', char = 'dayi', last = 0, g = null, best = 0;
-const keys = { duck: false };
-try { best = +localStorage.getItem('dk_best') || 0; } catch (e) {}
+const keys = { duck: false }, SITE = 'https://yusufbabali.github.io/dinozor-kacisi/';
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+best = +store.get('dk_best', 0) || 0;
+const isTouch = () => matchMedia('(pointer:coarse)').matches;
+function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+let wake = null;
+function wakeOn() { try { if (navigator.wakeLock && !wake) navigator.wakeLock.request('screen').then(l => { wake = l; l.addEventListener('release', () => { wake = null; }); }).catch(() => {}); } catch (e) {} }
+function wakeOff() { try { if (wake) wake.release(); } catch (e) {} wake = null; }
+function paintBests() { for (const el of document.querySelectorAll('[data-best]')) { const v = +store.get('dk_best_' + el.dataset.best, 0) || 0; el.textContent = v > 0 ? 'Rekor: ' + v : ''; } }
 const bestEl = document.getElementById('best'); bestEl.textContent = 'En iyi: ' + best;
 function reset() {
   g = { t: 0, cam: 0, speed: 0, speedMul: 1, dip: 0, y: 0, vy: 0, ground: true, hold: false, holdT: 0, phase: 0, obs: [], buns: [], fx: [], pops: [], next: 700, nextBun: 420,
     score: 0, nb: 0, hits: 0, recover: 0, inv: 0, stumbleT: 0, sprint: 0, pxOff: 0, charges: 3, superJ: false, eat: 0, proj: null, throwT: 0, duck: false,
     dino: newDino(0, 760), prev: null, shake: 0, banner: null, ct: 0, arifHand: [0, 0], roarAt: 0, roarType: 0, over: false, roared: false, bit: false, hamT: 9, dustT: 0,
-    wheel: 0, rocketUsed: false, rocketT: 0, pitch: 0, ar: { has: true, bites: 0, t: 0, reload: 0, cyc: -1 } };
+    wheel: 0, rocketUsed: false, rocketT: 0, pitch: 0, ar: { has: true, bites: 0, t: 0, reload: 0, cyc: -1 },
+    sky: 0, count: 0, mile: 0, flash: 0, buffer: 0, jumps: 0, escaped: 0, hint: null, hintJump: 0, hintDuck: 0, hintAb: false, tut: false };
 }
 reset();
 function banner(text, dur) { g.banner = { text, t: 0, dur }; }
@@ -775,13 +855,33 @@ function updatePad() {
   abName.textContent = C.abName; abCnt.textContent = inf ? '∞' : n; bAb.classList.toggle('empty', n <= 0);
 }
 function startRun(c) {
-  char = c; reset(); state = 'run'; ovSel.classList.remove('on'); ovOver.classList.remove('on');
+  char = c; reset(); state = 'count'; g.count = 1.8; ovSel.classList.remove('on'); ovOver.classList.remove('on'); ovPause.classList.remove('on');
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-  g.nb = 0; g.dino.entering = true; g.dino.growl = .9;
-  banner(c === 'asim' ? `${DINOS[0].name} peşinde! Pedal çevir!` : `${DINOS[0].name} peşinde! Kaç!`, 2.2);
-  audio(); sfx.roar(0); g.shake = 10; musicOn(); updatePad();
+  const runs = (+store.get('dk_runs', 0) || 0) + 1; store.set('dk_runs', runs); g.tut = runs <= 3;
+  audio(); sfx.tick(false); updatePad(); wakeOn();
 }
-function jumpPress() { if (state === 'run' && g.ground) { g.vy = 950; g.ground = false; g.hold = true; g.holdT = 0; sfx.jump(); } }
+function go() {
+  state = 'run'; g.nb = 0; g.dino.entering = true; g.dino.growl = .9;
+  banner(char === 'asim' ? `${DINOS[0].name} peşinde! Pedal çevir!` : `${DINOS[0].name} peşinde! Kaç!`, 2.2);
+  sfx.tick(true); sfx.roar(0); g.shake = 10; musicOn();
+}
+function pause() {
+  if (state !== 'run' && state !== 'count') return;
+  g.resumeTo = state; state = 'paused'; keys.duck = false; jumpRelease(); musicOff(); wakeOff();
+  ovPause.classList.add('on'); document.getElementById('resume').focus({ preventScroll: true });
+}
+function resume() {
+  if (state !== 'paused') return;
+  state = g.resumeTo || 'run'; ovPause.classList.remove('on'); last = performance.now();
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  if (state === 'run') musicOn(); wakeOn();
+}
+function toSelect() { ovOver.classList.remove('on'); ovPause.classList.remove('on'); ovSel.classList.add('on'); state = 'select'; musicOff(); wakeOff(); reset(); paintBests(); }
+function jumpPress() {
+  if (state !== 'run') return;
+  if (g.ground) { g.vy = 950; g.ground = false; g.hold = true; g.holdT = 0; g.jumps++; sfx.jump(); }
+  else if (g.vy < 0 && g.y < 90) g.buffer = .15;
+}
 function jumpRelease() { if (g) g.hold = false; }
 function ability() {
   if (state !== 'run') return;
@@ -791,7 +891,7 @@ function ability() {
     if (g.rocketUsed) return nope('Her zıplamada bir roket!');
     if (g.charges <= 0) return nope('Roket bitti!');
     g.charges--; g.rocketUsed = true; g.superJ = true; g.hold = false; g.vy = Math.max(g.vy, 0) * .3 + 880; g.rocketT = .55;
-    sfx.rocket(); g.shake = Math.max(g.shake, 4); pop('Roket!', px + 120, GY - g.y - 70);
+    sfx.rocket(); buzz(25); g.shake = Math.max(g.shake, 4); pop('Roket!', px + 120, GY - g.y - 70);
   } else if (C.ab === 'sprint') {
     if (g.sprint > 0) return nope('Zaten fırlıyor!');
     if (g.charges <= 0) return nope('Hakkın bitti!');
@@ -850,7 +950,7 @@ function knock(o) {
 }
 function stumble(o) {
   g.hits = 1; g.recover = CHARS[char].rec; g.inv = 1.2; g.stumbleT = .6; g.dip = 1; g.shake = 9; g.dino.growl = .55;
-  knock(o); sfx.trip(); sfx.growl(g.dino.type);
+  knock(o); sfx.trip(); sfx.growl(g.dino.type); buzz(40);
   banner('Tökezledin! Bir daha çarpma!', 1.6);
 }
 function grabLocal() { if (CHARS[char].bike) return [8, -83]; const S = SPEC[CHARS[char].kind]; return [-S.tw * .32, -(S.leg + S.torso * .62)]; }
@@ -861,23 +961,45 @@ function caught() {
   const m0 = mouthWorld(Object.assign({}, d, { x: 0, hd: [0, 0, 0], run: 0 }));
   g.catchX0 = d.x; g.catchX1 = gp[0] - m0[0] - 8;
   g.biteD = [8 / D.s, (gp[1] - m0[1]) / D.s];
-  g.shake = 8; sfx.trip();
-  const s0 = Math.floor(g.score); g.rec = s0 > best;
-  if (g.rec) { best = s0; try { localStorage.setItem('dk_best', best); } catch (e) {} }
-  bestEl.textContent = 'En iyi: ' + best;
+  g.shake = 8; sfx.trip(); buzz([70, 50, 140]); wakeOff(); keys.duck = false;
+  const s0 = Math.floor(g.score), kb = 'dk_best_' + char, cb = +store.get(kb, 0) || 0;
+  g.rec = s0 > best; g.crec = s0 > cb && s0 > 0; g.charBest = Math.max(cb, s0);
+  if (g.crec) store.set(kb, s0);
+  if (g.rec) { best = s0; store.set('dk_best', best); }
+  bestEl.textContent = 'En iyi: ' + best; paintBests();
 }
+const TIPS = {
+  all: ['Basılı tutarsan daha yükseğe zıplarsın.', 'Sarkan dallarda ve yüksekten uçan kuşlarda eğil.', 'Tökezledikten sonra ikinci kalp dolana kadar dikkatli ol.', 'Her 1000 puanda yeni bir dinozor ve yeni bir gökyüzü gelir.', 'Havadayken eğil tuşuna basarsan hızla yere inersin.'],
+  dayi: ['Fırla, tökezledikten hemen sonra kullanınca kalbini anında doldurur.'],
+  dayiArif: ['Poğaçayı tökezledikten sonra at: dinozor yerken kalbin dolar.'],
+  asim: ['Önce zıpla, havadayken roketi ateşle: en yükseğe böyle çıkarsın.'],
+};
 function showOver() {
   g.over = true;
   document.getElementById('fTitle').textContent = `${DINOS[g.dino.type].name} yakaladı!`;
   document.getElementById('fScore').textContent = Math.floor(g.score);
-  document.getElementById('fInfo').textContent = `${CHARS[char].name} · Poğaça: ${g.nb} · En iyi: ${best}`;
-  document.getElementById('newRec').hidden = !g.rec;
+  const st = document.getElementById('fStats'); st.textContent = '';
+  for (const [n, label] of [[g.nb, 'poğaça'], [g.escaped, 'dinozor atlatıldı'], [g.charBest, CHARS[char].name + ' rekoru']]) {
+    const sp = document.createElement('span'), b = document.createElement('b'); b.textContent = n; sp.append(b, ' ' + label); st.append(sp);
+  }
+  const nr = document.getElementById('newRec'); nr.hidden = !(g.rec || g.crec); nr.textContent = g.rec ? 'Yeni rekor!' : CHARS[char].name + ' için yeni rekor!';
+  const pool = TIPS.all.concat(TIPS[char]); document.getElementById('fTip').textContent = 'İpucu: ' + pool[Math.floor(Math.random() * pool.length)];
+  if (g.rec || g.crec) { sfx.record(); buzz([30, 40, 30]); for (let k = 0; k < 90; k++) g.fx.push({ k: 'conf', x: Math.random() * LW, y: -20 - Math.random() * 300, vx: (Math.random() - .5) * 120, vy: 120 + Math.random() * 160, a: 0, life: 3.5, r: Math.random() * 6, c: ['#ffd23f', '#ef7a1a', '#ff5c8a', '#3fa7b5', '#86bb6a', '#fff6e0'][k % 6] }); }
   ovOver.classList.add('on'); document.getElementById('again').focus({ preventScroll: true });
+}
+async function shareScore() {
+  const btn = document.getElementById('share'), text = `Dinozor Kaçışı'nda ${CHARS[char].name} ile ${Math.floor(g.score)} puan yaptım! Sen de dene:`;
+  try { if (navigator.share) { await navigator.share({ title: 'Dinozor Kaçışı', text, url: SITE }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text + ' ' + SITE); btn.textContent = 'Kopyalandı!'; }
+  catch (e) { document.getElementById('fTip').textContent = 'Bağlantı: ' + SITE; }
+  setTimeout(() => { btn.textContent = 'Paylaş'; }, 2200);
 }
 
 // =============================================================== update
 function updateFx(dt) {
-  for (const f of g.fx) { f.a += dt; if (f.vx !== undefined) { f.x += f.vx * dt; f.y += (f.vy || 0) * dt; if (f.k === 'chunk' || f.k === 'crumb') f.vy += 1800 * dt; } else f.x -= g.speed * dt; }
+  for (const f of g.fx) { f.a += dt; if (f.vx !== undefined) { f.x += f.vx * dt; f.y += (f.vy || 0) * dt; if (f.k === 'chunk' || f.k === 'crumb') f.vy += 1800 * dt; if (f.k === 'conf') f.vx += Math.sin(f.a * 5 + f.r) * 40 * dt; } else f.x -= g.speed * dt; }
+  if (g.hint) { g.hint.t += dt; if (g.hint.t > g.hint.dur) g.hint = null; }
+  g.flash = Math.max(0, g.flash - dt);
   g.fx = g.fx.filter(f => f.a < f.life);
   for (const p of g.pops) p.a += dt; g.pops = g.pops.filter(p => p.a < .9);
   if (g.banner) { g.banner.t += dt; if (g.banner.t > g.banner.dur) g.banner = null; }
@@ -913,14 +1035,30 @@ function updateDino(dt) {
     g.prev = Object.assign({}, d, { t: 0 });
     g.dino = newDino(idx, 1150); g.dino.entering = true; g.dino.stepN = 0;
     if (g.hits) { g.hits = 0; g.recover = 0; }
-    banner(`${DINOS[d.type].name} yoruldu! Sırada ${DINOS[idx].name}!`, 2.8); sfx.tired();
+    banner(`${DINOS[d.type].name} yoruldu! Sırada ${DINOS[idx].name}!`, 2.8); sfx.tired(); g.escaped++;
     g.roarAt = g.t + 1.1; g.roarType = idx;
   }
   if (g.roarAt && g.t >= g.roarAt) { g.roarAt = 0; sfx.roar(g.roarType); g.dino.growl = .9; g.shake = 10; }
 }
+function hintShow(text, dur, kind) { if (!g.hint || g.hint.kind !== kind) g.hint = { text, t: 0, dur, kind }; else g.hint.dur = Math.max(g.hint.dur, g.hint.t + .3); }
+function tutorial() {
+  const C = CHARS[char], touch = isTouch(), px = PX + g.pxOff;
+  if (g.t > .2 && g.t < 5 && g.jumps === 0) hintShow(touch ? 'Zıplamak için ekrana dokun' : 'Zıpla: Boşluk ya da ↑', .4, 'jump0');
+  for (const o of g.obs) {
+    const d = o.x - px; if (o.gone || d < 30 || d > g.speed * 1.05) continue;
+    const duck = o.type === 'vine' || o.type === 'pteroDuck';
+    if (duck && (g.hintDuck < 2 || o.hinted)) { if (!o.hinted) { o.hinted = true; g.hintDuck++; } hintShow(touch ? 'Eğil! (Eğil düğmesi)' : 'Eğil! (↓)', .3, 'duck'); }
+    else if (!duck && (g.hintJump < 2 || o.hinted)) { if (!o.hinted) { o.hinted = true; g.hintJump++; } hintShow(touch ? 'Zıpla! (dokun)' : 'Zıpla! (Boşluk)', .3, 'jump'); }
+    break;
+  }
+  if (!g.hintAb && g.t > 9) { g.hintAb = true; hintShow(`Özel güç: ${C.abName} (${touch ? 'ortadaki düğme' : 'X'})`, 3.5, 'ab'); }
+}
 function update(dt) {
+  if (state === 'paused') return;
   T += dt;
+  g.sky += ((state === 'run' || state === 'caught' ? g.dino.type : 0) - g.sky) * Math.min(1, dt * .8);
   if (state === 'select') { g.cam += 60 * dt; g.phase += dt * 6; return; }
+  if (state === 'count') { g.count -= dt; const n = Math.ceil(g.count / .6); if (n !== g.countN) { if (g.countN !== undefined && n > 0) sfx.tick(false); g.countN = n; } if (g.count <= 0) go(); return; }
   if (state === 'caught') { updateCaught(dt); return; }
   const C = CHARS[char];
   g.t += dt;
@@ -930,6 +1068,8 @@ function update(dt) {
   g.speedMul += (mul - g.speedMul) * Math.min(1, dt * 6);
   g.speed = (g.t < .7 ? smooth(g.t / .7) : 1) * base * g.speedMul;
   g.cam += g.speed * dt; g.score += g.speed * dt / 40 / SPK;
+  const ml = Math.floor(g.score / 100); if (ml > g.mile) { g.mile = ml; if (ml % 10) { sfx.mile(); g.flash = .7; } }
+  if (g.tut) tutorial();
   g.phase += dt * TAU * C.rate * (g.speed / 600 / SPK) * (g.sprint > 0 ? 1.45 : 1);
   g.pxOff += ((g.sprint > 0 ? 70 : 0) - g.pxOff) * Math.min(1, dt * 4);
   g.inv = Math.max(0, g.inv - dt); g.stumbleT = Math.max(0, g.stumbleT - dt);
@@ -945,8 +1085,9 @@ function update(dt) {
     g.vy -= grav * dt; g.y += g.vy * dt;
     if (g.superJ && Math.random() < .7) g.fx.push({ k: 'spark', x: PX + g.pxOff + (Math.random() - .5) * 40, y: GY - g.y - 20 - Math.random() * 60, vx: -60, vy: 30, a: 0, life: .55, r: Math.random() * 6 });
     const top = GY - 150; if (g.y > top) { g.y = top; g.vy = Math.min(g.vy, 0); }
-    if (g.y <= 0) { g.y = 0; g.vy = 0; g.ground = true; g.superJ = false; g.rocketUsed = false; }
+    if (g.y <= 0) { g.y = 0; g.vy = 0; g.ground = true; g.superJ = false; g.rocketUsed = false; if (g.buffer > 0) { g.buffer = 0; jumpPress(); g.hold = false; } }
   }
+  g.buffer = Math.max(0, g.buffer - dt);
   g.rocketT = Math.max(0, g.rocketT - dt);
   if (g.rocketT > 0) for (let j = 0; j < 2; j++) g.fx.push({ k: 'smoke', x: PX + g.pxOff - 92 * C.s + (Math.random() - .5) * 10, y: GY + 8 - g.y - 58 * C.s + (Math.random() - .5) * 10, vx: -160 - Math.random() * 120, vy: 90 + Math.random() * 80, a: 0, life: .6 });
   if (C.bike) { g.wheel += g.speed * dt / (BK.R * C.s); const pt = !g.ground ? (g.rocketT > 0 ? -.3 : g.vy > 0 ? -.12 : .07) : 0; g.pitch += (pt - g.pitch) * Math.min(1, dt * 8); }
@@ -1038,7 +1179,7 @@ function drawPlayerAt(px, py, st, ex, w, extra) {
   return h ? [px + C.s * h[0], py + C.s * h[1]] : null;
 }
 function drawPlayer() {
-  const C = CHARS[char], air = !g.ground, run = state === 'select' ? 0 : 1;
+  const C = CHARS[char], air = !g.ground, run = state === 'select' || state === 'count' ? 0 : (state === 'paused' && g.resumeTo === 'count' ? 0 : 1);
   if (C.bike) {
     let px = PX + g.pxOff; const py = GY + 8 - g.y;
     const st = { pedal: g.wheel / 1.7, wheel: g.wheel, lean: g.duck ? 1.1 : .32, pitch: g.pitch, fire: g.rocketT > 0 ? Math.min(1, g.rocketT / .12) : 0 };
@@ -1094,8 +1235,16 @@ function txt(s, x, y, al, size = 34, fillc = '#fff6e0') {
 }
 function hud() {
   const C = CHARS[char]; X.textBaseline = 'top';
-  txt(String(Math.floor(g.score)).padStart(5, '0'), LW - 24, 14, 'right');
+  const fl = g.flash > 0 && Math.floor(g.flash * 10) % 2 === 0;
+  txt(String(Math.floor(g.score)).padStart(5, '0'), LW - 24, 14, 'right', 34, fl ? '#ffd23f' : '#fff6e0');
   txt('En iyi ' + best, LW - 24, 54, 'right', 20);
+  if (state !== 'count') {
+    const into = (g.score % 1000) / 1000, nx = DINOS[(Math.floor(g.score / 1000) + 1) % 3].name, bw = 170, bx = LW - 24 - bw, by = 84;
+    rrect(bx, by, bw, 12, 6); fill('rgba(255,255,255,.35)');
+    if (into > .02) { rrect(bx, by, Math.max(12, bw * into), 12, 6); fill('#ef9a3a'); }
+    rrect(bx, by, bw, 12, 6); X.lineWidth = 2.6; X.strokeStyle = OUT; X.stroke();
+    txt('Sıradaki: ' + nx, LW - 24, 102, 'right', 17);
+  }
   LWO = 3;
   for (let i = 0; i < 2; i++) {
     const hx = 36 + i * 44, hy = 40;
@@ -1132,7 +1281,7 @@ function draw() {
   LWO = 2.6; background(T, g.cam);
   const amt = state === 'run' ? clamp(g.speed / 600 / SPK) * (g.sprint > 0 ? 1.6 : 1) : 0;
   if (amt > 0) { X.lineCap = 'round'; X.lineWidth = 3; X.strokeStyle = `rgba(255,255,255,${.3 * Math.min(1.5, amt)})`; for (let k = 0; k < 10; k++) { const y = 90 + HS(k, 1) * (GY - 160), L = 90 + HS(k, 2) * 160, x = LW + 200 - ((T * 1900 + HS(k, 3) * 3000) % (LW + 600)); X.beginPath(); X.moveTo(x, y); X.lineTo(x + L, y); X.stroke(); } }
-  if (state !== 'select') {
+  if (state !== 'select' && state !== 'count' && !(state === 'paused' && g.resumeTo === 'count')) {
     if (g.prev) drawDino(g.prev);
     if (state === 'caught' && g.ct >= 1.4) { drawDino(g.dino, 'body'); drawDangle(); drawDino(g.dino, 'head'); }
     else drawDino(g.dino);
@@ -1154,6 +1303,7 @@ function draw() {
     else if (f.k === 'heart') { X.globalAlpha = a; heart(f.x, f.y, 14); fs('#ff5c8a', 2.4); X.globalAlpha = 1; }
     else if (f.k === 'smoke') { const q = f.a / f.life; ell(f.x, f.y, 8 + 22 * q, 7 + 18 * q); fill(`rgba(214,212,218,${.7 * (1 - q)})`); }
     else if (f.k === 'crumb') { ell(f.x, f.y, 3.4, 2.5, f.a * 9); fill('#d9993f'); }
+    else if (f.k === 'conf') { X.save(); X.translate(f.x, f.y); X.rotate(f.a * 6 + f.r); X.fillStyle = f.c; X.fillRect(-6, -3.5, 12, 7); X.restore(); }
   }
   if (state === 'caught') {
     const ct = g.ct;
@@ -1168,10 +1318,29 @@ function draw() {
   LWO = 2.6; foreground(T, g.cam);
   X.restore();
   if (state !== 'select') hud();
+  if (state === 'count' || (state === 'paused' && g.resumeTo === 'count')) {
+    const n = Math.max(1, Math.ceil(g.count / .6)), k = 1 - ((g.count / .6) % 1 || 1), s = 1.5 - .5 * smooth(k * 3);
+    X.save(); X.translate(LW / 2, LH * .42); X.scale(s, s); X.globalAlpha = 1 - clamp((k - .75) * 4); X.textBaseline = 'middle'; txt(String(n), 0, 0, 'center', 150, '#ffd23f'); X.restore();
+  } else if (state === 'run' && g.t < .7) {
+    const k = g.t / .7; X.save(); X.translate(LW / 2, LH * .42); X.scale(1 + k * .4, 1 + k * .4); X.globalAlpha = 1 - k; X.textBaseline = 'middle'; txt('KAÇ!', 0, 0, 'center', 130, '#ef7a1a'); X.restore();
+  }
+  if (g.hint && state === 'run') {
+    const h = g.hint, C = CHARS[char], a = clamp(Math.min(h.t / .15, (h.dur - h.t) / .2));
+    if (a > 0) {
+      X.save(); X.globalAlpha = a; X.font = '800 26px "Baloo 2", Nunito, system-ui, sans-serif';
+      const w = X.measureText(h.text).width + 36, px = clamp(PX + g.pxOff, w / 2 + 10, LW - w / 2 - 10), py = Math.max(150, GY + 8 - g.y - C.h - 62) + Math.sin(T * 6) * 4;
+      rrect(px - w / 2, py - 24, w, 48, 16); fs('#fff6e0', 4); X.beginPath(); X.moveTo(PX + g.pxOff - 12, py + 22); X.lineTo(PX + g.pxOff, py + 40); X.lineTo(PX + g.pxOff + 12, py + 22); X.closePath(); fs('#fff6e0', 4);
+      X.fillStyle = '#fff6e0'; X.fillRect(PX + g.pxOff - 10, py + 16, 20, 7);
+      X.fillStyle = OUT; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(h.text, px, py + 2); X.restore();
+    }
+  }
 }
+let shownPause = null;
 function loop(ts) {
   const dt = Math.min(.033, Math.max(0, (ts - last) / 1000)); last = ts;
-  update(dt); draw(); requestAnimationFrame(loop);
+  update(dt); draw();
+  const sp = state === 'run' || state === 'count' || state === 'paused'; if (sp !== shownPause) { shownPause = sp; pauseBtn.hidden = !sp; }
+  requestAnimationFrame(loop);
 }
 
 // =============================================================== UI wiring
@@ -1184,17 +1353,30 @@ for (const b of document.querySelectorAll('.ch')) {
   X.restore(); LWO = 3.2;
   b.addEventListener('click', e => { e.stopPropagation(); startRun(k); });
 }
+const ovPause = document.getElementById('ovPause'), pauseBtn = document.getElementById('pauseBtn'), fsBtn = document.getElementById('fsBtn');
 document.getElementById('again').addEventListener('click', e => { e.stopPropagation(); startRun(char); });
-document.getElementById('pick').addEventListener('click', e => { e.stopPropagation(); ovOver.classList.remove('on'); ovSel.classList.add('on'); state = 'select'; reset(); });
+document.getElementById('pick').addEventListener('click', e => { e.stopPropagation(); toSelect(); });
+document.getElementById('share').addEventListener('click', e => { e.stopPropagation(); shareScore(); });
+document.getElementById('resume').addEventListener('click', e => { e.stopPropagation(); resume(); });
+document.getElementById('quit').addEventListener('click', e => { e.stopPropagation(); toSelect(); });
+pauseBtn.addEventListener('click', () => { if (state === 'paused') resume(); else pause(); });
+if (document.fullscreenEnabled) fsBtn.hidden = false;
+fsBtn.addEventListener('click', () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {} });
+document.addEventListener('fullscreenchange', () => { fsBtn.setAttribute('aria-label', document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); setTimeout(resize, 60); });
+addEventListener('blur', () => { if (state === 'run' || state === 'count') pause(); });
+paintBests();
 wrap.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; e.preventDefault(); jumpPress(); });
 addEventListener('pointerup', jumpRelease); addEventListener('pointercancel', jumpRelease);
 const JUMP = ['Space', 'ArrowUp', 'KeyW'], DUCK = ['ArrowDown', 'KeyS'], ABIL = ['KeyX', 'ArrowRight', 'ShiftLeft', 'ShiftRight'];
 addEventListener('keydown', e => {
   const c = e.code;
+  if (c === 'KeyP' || c === 'Escape') { if (state === 'run' || state === 'count') { e.preventDefault(); pause(); } else if (state === 'paused') { e.preventDefault(); resume(); } return; }
+  if (state === 'select' && ['Digit1', 'Digit2', 'Digit3', 'Numpad1', 'Numpad2', 'Numpad3'].includes(c)) { e.preventDefault(); startRun(['dayi', 'dayiArif', 'asim'][+c.slice(-1) - 1]); return; }
+  if (c === 'Enter' && state === 'caught' && g.over) { e.preventDefault(); startRun(char); return; }
   if (JUMP.includes(c)) {
     if (e.target.closest && e.target.closest('button') && state !== 'run') return;
     e.preventDefault(); if (e.repeat) return;
-    if (state === 'run') jumpPress(); else if (state === 'caught' && g.over && g.ct > 3.1) startRun(char);
+    if (state === 'run') jumpPress(); else if (state === 'paused') resume(); else if (state === 'caught' && g.over && g.ct > 3.1) startRun(char);
   } else if (DUCK.includes(c)) { if (state === 'run') { e.preventDefault(); keys.duck = true; } }
   else if (ABIL.includes(c)) { if (state === 'run') { e.preventDefault(); if (!e.repeat) ability(); } }
 });
@@ -1212,7 +1394,11 @@ const muteBtn = document.getElementById('mute');
 function paintMute() { document.getElementById('wave').style.display = muted ? 'none' : ''; document.getElementById('cross').style.display = muted ? '' : 'none'; muteBtn.setAttribute('aria-label', muted ? 'Sesi aç' : 'Sesi kapat'); }
 muteBtn.addEventListener('click', () => { muted = !muted; try { localStorage.setItem('dk_muted', muted ? '1' : '0'); } catch (e) {} if (master) master.gain.value = muted ? 0 : .9; paintMute(); });
 paintMute(); updatePad();
-document.addEventListener('visibilitychange', () => { if (!AC) return; if (document.hidden) AC.suspend().catch(() => {}); else AC.resume().catch(() => {}); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && (state === 'run' || state === 'count')) pause();
+  if (!document.hidden && state !== 'paused' && state !== 'select') wakeOn();
+  if (!AC) return; if (document.hidden) AC.suspend().catch(() => {}); else AC.resume().catch(() => {});
+});
 const ro = new ResizeObserver(resize); ro.observe(document.body); addEventListener('resize', resize);
 resize();
 requestAnimationFrame(t => { last = t; loop(t); });
