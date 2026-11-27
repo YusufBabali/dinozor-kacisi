@@ -1,7 +1,7 @@
 {
   "name": "Dinozor Kaçışı",
   "short_name": "Dinozor",
-  "description": "Yusuf Dayı, Arif ve Asım dinozorlardan kaçıyor! Zıpla, eğil, poğaça topla.",
+  "description": "Dayı, Arif ve Asım dinozorlardan kaçıyor! Zıpla, eğil, poğaça topla.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",

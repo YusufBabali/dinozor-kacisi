@@ -2,11 +2,11 @@
 
 ![Dinozor Kaçışı](og.png)
 
-Yusuf Dayı, Arif ve Asım'ın dinozorlardan kaçtığı, tarayıcıda oynanan bir koşu oyunu. Kurulum yok; bağlantıyı açıp oynaman yeterli.
+Dayı, Arif ve Asım'ın dinozorlardan kaçtığı, tarayıcıda oynanan bir koşu oyunu. Kurulum yok; bağlantıyı açıp oynaman yeterli.
 
 **▶ Oyna:** https://yusufbabali.github.io/dinozor-kacisi/
 
-Telefonda tarayıcı menüsünden **Ana ekrana ekle** dersen uygulama gibi açılır.
+Üstteki **tam ekran** düğmesiyle oyun bütün ekranı kaplar; telefonu yan çevirirsen düğmeler oyunun iki yanına geçer. Telefonda **Paylaş → Ana Ekrana Ekle** dersen oyun uygulama gibi, tarayıcı çubukları olmadan açılır.
 
 ## Nasıl oynanır
 
@@ -24,7 +24,7 @@ Telefonda tarayıcı menüsünden **Ana ekrana ekle** dersen uygulama gibi açı
 
 ## Karakterler
 
-- **Yusuf Dayı:** Fırlar, tökezleyince hemen toparlanır (3 hak).
+- **Dayı:** Fırlar, tökezleyince hemen toparlanır (3 hak).
 - **Arifli Dayı:** Arif poğaçasını yer, dinozora sınırsız poğaça atar.
 - **Asım:** Bisikletle kaçar, havadayken roketle bir kez daha zıplar (3 roket).
 
