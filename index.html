@@ -74,6 +74,7 @@ h1 span{color:var(--acc);-webkit-text-stroke:1.5px var(--frame);paint-order:stro
 .pb.jump{background:var(--acc)}
 .pb.ab{background:#bfe3f0}
 .pb.ab.empty{opacity:.55}
+.pb:disabled{opacity:.4;filter:grayscale(.85);box-shadow:0 2px 0 var(--frame);transform:translateY(3px)}
 .pb .cnt{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:999px;background:var(--frame);color:#fff6e0;font-size:16px;padding:0 6px}
 .hint{width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px 14px;flex-wrap:wrap;color:var(--soft);font-weight:700;font-size:15px}
 .hint b{color:var(--ink)}
@@ -129,7 +130,7 @@ html.full.land #bDuck{grid-column:1;grid-row:2}html.full.land #bAb{grid-column:3
         <p>Birini seç! İlk çarpmada tökezlersin, ikincisinde dinozor yakalar. Her 1000 puanda yeni bir dinozor gelir.</p>
         <div class="chars">
           <button class="ch" data-c="dayi"><canvas width="220" height="220"></canvas><b>Dayı</b><small>Fırlar, tökezleyince hemen toparlanır</small><span class="cb" data-best="dayi"></span></button>
-          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaça yer, 6 saniyede bir dinozora atar</small><span class="cb" data-best="dayiArif"></span></button>
+          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaçasını yer, dinozora da atar</small><span class="cb" data-best="dayiArif"></span></button>
           <button class="ch" data-c="asim"><canvas width="220" height="220"></canvas><b>Asım</b><small>Her zıplamada roket, altın poğaça toplar</small><span class="cb" data-best="asim"></span></button>
         </div>
         <p class="kbdhint keys">Klavyeden <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> ile de seçebilirsin.</p>
@@ -171,7 +172,7 @@ html.full.land #bDuck{grid-column:1;grid-row:2}html.full.land #bAb{grid-column:3
     <span id="best">En iyi: 0</span>
   </div>
   <div class="toast" id="toast" role="status" hidden></div>
-  <p class="rules">Poğaça topla: her biri +20 puan. Dayı fırlar; Arif dinozora poğaça atar (yenisi 6 saniyede gelir); Asım her zıplamada bir kez roket ateşler, roketle kuşları devirir ve altın poğaça (+100) toplar.</p>
+  <p class="rules">Poğaça topla: her biri +20 puan. Dayı fırlar; Arif dinozora poğaça atar; Asım her zıplamada bir kez roket ateşler, roketle kuşları devirir ve altın poğaça (+100) toplar.</p>
 </main>
 <script>
 {
@@ -876,7 +877,7 @@ function pop(text, x, y, col = '#ffd23f') { g.pops.push({ text, x, y, a: 0, col 
 const abName = document.getElementById('abName'), abCnt = document.getElementById('abCnt'), bAb = document.getElementById('bAb');
 function updatePad() {
   const C = CHARS[char], inf = C.ab === 'toss' || C.ab === 'rocket', n = C.ab === 'toss' ? (g.ar.has ? 1 : 0) : inf ? 1 : g.charges;
-  abName.textContent = C.abName; abCnt.textContent = inf ? '∞' : n; bAb.classList.toggle('empty', n <= 0);
+  abName.textContent = C.abName; abCnt.textContent = inf ? '∞' : n; bAb.classList.toggle('empty', n <= 0); bAb.disabled = C.ab === 'toss' && !g.ar.has;
 }
 function startRun(c) {
   char = c; reset(); state = 'count'; g.count = 1.8; ovSel.classList.remove('on'); ovOver.classList.remove('on'); ovPause.classList.remove('on');
@@ -921,8 +922,8 @@ function ability() {
     g.charges--; g.sprint = 1.8; g.inv = Math.max(g.inv, .4); sfx.sprint(); pop('Fırla!', px, GY - 170);
     if (g.hits) { g.hits = 0; g.recover = 0; banner('Hemen toparlandı!', 1.3); }
   } else {
-    if (g.proj || !g.ar.has) return nope('Arif yeni poğaça hazırlıyor!');
-    g.proj = { t: 0, x0: g.arifHand[0], y0: g.arifHand[1], b: g.ar.bites }; g.ar.has = false; g.ar.reload = g.ar.max = 6; g.throwT = .35;
+    if (g.proj || !g.ar.has) return;
+    g.proj = { t: 0, x0: g.arifHand[0], y0: g.arifHand[1], b: g.ar.bites }; g.ar.has = false; g.ar.reload = [10, 5, 2.5][Math.min(2, Math.floor(g.score / 1000))]; g.throwT = .35;
     sfx.toss(); pop('Poğaça!', g.arifHand[0], g.arifHand[1] - 10);
   }
   updatePad();
@@ -931,11 +932,11 @@ function nope(msg) { sfx.nope(); pop(msg, PX + g.pxOff, GY - 200, '#ff9b9b'); }
 // Arif munches his poğaça whenever he is not throwing it; a fresh one appears when it is gone
 function arifEat(dt) {
   const A = g.ar;
-  if (!A.has) { A.reload -= dt; if (A.reload <= 0) { A.has = true; A.bites = 0; A.t = 0; A.cyc = -1; updatePad(); if (A.max > 1) pop('Poğaça hazır!', g.arifHand[0], g.arifHand[1] - 20, '#ffd23f'); g.fx.push({ k: 'spark', x: g.arifHand[0] + 14, y: g.arifHand[1] - 12, vx: 0, vy: -50, a: 0, life: .5, r: 0 }); } return; }
+  if (!A.has) { A.reload -= dt; if (A.reload <= 0) { A.has = true; A.bites = 0; A.t = 0; A.cyc = -1; updatePad(); g.fx.push({ k: 'spark', x: g.arifHand[0] + 14, y: g.arifHand[1] - 12, vx: 0, vy: -50, a: 0, life: .5, r: 0 }); } return; }
   if (g.throwT > 0 || g.duck) return;
   A.t += dt; const cyc = Math.floor(A.t / 1.7), u = (A.t % 1.7) / 1.7;
   if (u >= .34 && A.cyc !== cyc && A.bites < 3) { A.cyc = cyc; A.bites++; sfx.nom(); for (let j = 0; j < 5; j++) g.fx.push({ k: 'crumb', x: g.arifHand[0] + 4, y: g.arifHand[1] - 4, vx: -40 - Math.random() * 120, vy: -40 - Math.random() * 90, a: 0, life: .8 }); }
-  if (A.bites >= 3 && u >= .72) { A.has = false; A.reload = A.max = .5; }
+  if (A.bites >= 3 && u >= .72) { A.bites = 0; A.t = 0; A.cyc = -1; g.fx.push({ k: 'spark', x: g.arifHand[0] + 14, y: g.arifHand[1] - 12, vx: 0, vy: -50, a: 0, life: .5, r: 0 }); }
 }
 function spawn() {
   const s = g.score, pool = [['log', 3], ['rock', 3]];
@@ -996,7 +997,7 @@ function caught() {
 const TIPS = {
   all: ['Basılı tutarsan daha yükseğe zıplarsın.', 'Sarkan dallarda ve yüksekten uçan kuşlarda eğil.', 'Tökezledikten sonra ikinci kalp dolana kadar dikkatli ol.', 'Her 1000 puanda yeni bir dinozor ve yeni bir gökyüzü gelir.', 'Havadayken eğil tuşuna basarsan hızla yere inersin.'],
   dayi: ['Fırla, tökezledikten hemen sonra kullanınca kalbini anında doldurur.'],
-  dayiArif: ['Poğaçayı tökezledikten sonra at: dinozor yerken kalbin dolar. Yenisi 6 saniyede gelir.', 'Arif omzundayken Dayı biraz daha alçak zıplar.'],
+  dayiArif: ['Poğaçayı tökezledikten sonra at: dinozor yerken kalbin dolar.', 'Poğaça atınca düğme bir süre kapanır; her yeni dinozorda bu süre kısalır.', 'Arif omzundayken Dayı biraz daha alçak zıplar.'],
   asim: ['Önce zıpla, havadayken roketi ateşle: en yükseğe böyle çıkarsın.', 'Roket yanarken kuşlara ve dallara çarparsan onları devirirsin.', 'Altın poğaçalar çok yüksekte: zıpla + roket, +100 puan!'],
 };
 function showOver() {
@@ -1287,10 +1288,10 @@ function hud() {
   drawBun(132, 40, 1.15); X.textBaseline = 'top'; txt('× ' + g.nb, 154, 20, 'left');
   const ready = C.ab === 'toss' ? g.ar.has : C.ab === 'rocket' ? g.ground || !g.rocketUsed : g.charges > 0;
   star(34, 86, 13, 0); fs(ready ? '#ffd23f' : '#c9c2b0', 2.6);
-  if (C.ab === 'toss' && !g.ar.has && g.ar.max > 1) { X.beginPath(); X.arc(34, 86, 19, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(1 - g.ar.reload / g.ar.max)); X.lineWidth = 4; X.strokeStyle = '#ffd23f'; X.stroke(); }
+
   X.textBaseline = 'middle'; txt(C.abName, 56, 86, 'left', 22);
   X.font = '800 22px "Baloo 2", Nunito, system-ui, sans-serif'; const wd = X.measureText(C.abName).width;
-  if (C.ab === 'toss') txt(g.ar.has ? '∞' : Math.ceil(g.ar.reload) + ' sn', 64 + wd, 85, 'left', g.ar.has ? 28 : 20);
+  if (C.ab === 'toss') txt('∞', 64 + wd, 85, 'left', 28);
   else if (C.ab === 'rocket') { ell(70 + wd, 86, 7, 7); fs(ready ? '#ffd23f' : 'rgba(255,255,255,.35)', 2.6); }
   else for (let i = 0; i < 3; i++) { ell(66 + wd + i * 22, 86, 7, 7); fs(i < g.charges ? '#ffd23f' : 'rgba(255,255,255,.35)', 2.6); }
   if (C.ab === 'rocket' && state === 'run' && !g.ground && !g.rocketUsed) txt('Roket hazır!', 90 + wd, 86, 'left', 18, '#ffd23f');
