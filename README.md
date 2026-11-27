@@ -25,7 +25,7 @@ Dayı, Arif ve Asım'ın dinozorlardan kaçtığı, tarayıcıda oynanan bir ko�
 ## Karakterler
 
 - **Dayı:** Fırlar, tökezleyince hemen toparlanır (3 hak).
-- **Arifli Dayı:** Arif poğaçasını yer, dinozora sınırsız poğaça atar.
-- **Asım:** Bisikletle kaçar, havadayken roketle bir kez daha zıplar (3 roket).
+- **Arifli Dayı:** Arif poğaçasını yer; dinozora poğaça atınca dinozor durup yer ve kalbin dolar. Yeni poğaça 6 saniyede gelir. Arif omzunda olduğu için Dayı biraz daha alçak zıplar.
+- **Asım:** Bisikletle kaçar. Her zıplamada bir kez roket ateşleyip havada yeniden yükselir. Roket yanarken kuşları ve dalları devirir (+30), sadece roketle ulaşılan altın poğaçaları toplar (+100).
 
 Rekorlar her karakter için ayrı tutulur ve yalnızca oynadığın cihazda saklanır.

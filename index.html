@@ -129,8 +129,8 @@ html.full.land #bDuck{grid-column:1;grid-row:2}html.full.land #bAb{grid-column:3
         <p>Birini seç! İlk çarpmada tökezlersin, ikincisinde dinozor yakalar. Her 1000 puanda yeni bir dinozor gelir.</p>
         <div class="chars">
           <button class="ch" data-c="dayi"><canvas width="220" height="220"></canvas><b>Dayı</b><small>Fırlar, tökezleyince hemen toparlanır</small><span class="cb" data-best="dayi"></span></button>
-          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaçasını yer, sınırsız poğaça atar</small><span class="cb" data-best="dayiArif"></span></button>
-          <button class="ch" data-c="asim"><canvas width="220" height="220"></canvas><b>Asım</b><small>Bisikletle kaçar, roketle 2. kez zıplar</small><span class="cb" data-best="asim"></span></button>
+          <button class="ch" data-c="dayiArif"><canvas width="220" height="220"></canvas><b>Arifli Dayı</b><small>Arif poğaça yer, 6 saniyede bir dinozora atar</small><span class="cb" data-best="dayiArif"></span></button>
+          <button class="ch" data-c="asim"><canvas width="220" height="220"></canvas><b>Asım</b><small>Her zıplamada roket, altın poğaça toplar</small><span class="cb" data-best="asim"></span></button>
         </div>
         <p class="kbdhint keys">Klavyeden <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> ile de seçebilirsin.</p>
       </div>
@@ -171,7 +171,7 @@ html.full.land #bDuck{grid-column:1;grid-row:2}html.full.land #bAb{grid-column:3
     <span id="best">En iyi: 0</span>
   </div>
   <div class="toast" id="toast" role="status" hidden></div>
-  <p class="rules">Poğaça topla: her biri +20 puan. Dayı fırlar, Arif dinozora sınırsız poğaça atar, Asım bisikletinin roketleriyle havada bir kez daha zıplar (3 roket).</p>
+  <p class="rules">Poğaça topla: her biri +20 puan. Dayı fırlar; Arif dinozora poğaça atar (yenisi 6 saniyede gelir); Asım her zıplamada bir kez roket ateşler, roketle kuşları devirir ve altın poğaça (+100) toplar.</p>
 </main>
 <script>
 {
@@ -875,7 +875,7 @@ function banner(text, dur) { g.banner = { text, t: 0, dur }; }
 function pop(text, x, y, col = '#ffd23f') { g.pops.push({ text, x, y, a: 0, col }); }
 const abName = document.getElementById('abName'), abCnt = document.getElementById('abCnt'), bAb = document.getElementById('bAb');
 function updatePad() {
-  const C = CHARS[char], inf = C.ab === 'toss', n = inf ? 1 : g.charges;
+  const C = CHARS[char], inf = C.ab === 'toss' || C.ab === 'rocket', n = C.ab === 'toss' ? (g.ar.has ? 1 : 0) : inf ? 1 : g.charges;
   abName.textContent = C.abName; abCnt.textContent = inf ? '∞' : n; bAb.classList.toggle('empty', n <= 0);
 }
 function startRun(c) {
@@ -903,7 +903,7 @@ function resume() {
 function toSelect() { ovOver.classList.remove('on'); ovPause.classList.remove('on'); ovSel.classList.add('on'); state = 'select'; musicOff(); wakeOff(); reset(); paintBests(); }
 function jumpPress() {
   if (state !== 'run') return;
-  if (g.ground) { g.vy = 950; g.ground = false; g.hold = true; g.holdT = 0; g.jumps++; sfx.jump(); }
+  if (g.ground) { g.vy = char === 'dayiArif' ? 900 : 950; g.ground = false; g.hold = true; g.holdT = 0; g.jumps++; sfx.jump(); }
   else if (g.vy < 0 && g.y < 90) g.buffer = .15;
 }
 function jumpRelease() { if (g) g.hold = false; }
@@ -913,8 +913,7 @@ function ability() {
   if (C.ab === 'rocket') {
     if (g.ground) { jumpPress(); return; }
     if (g.rocketUsed) return nope('Her zıplamada bir roket!');
-    if (g.charges <= 0) return nope('Roket bitti!');
-    g.charges--; g.rocketUsed = true; g.superJ = true; g.hold = false; g.vy = Math.max(g.vy, 0) * .3 + 880; g.rocketT = .55;
+    g.rocketUsed = true; g.superJ = true; g.hold = false; g.vy = Math.max(g.vy, 0) * .3 + 900; g.rocketT = .6;
     sfx.rocket(); buzz(25); g.shake = Math.max(g.shake, 4); pop('Roket!', px + 120, GY - g.y - 70);
   } else if (C.ab === 'sprint') {
     if (g.sprint > 0) return nope('Zaten fırlıyor!');
@@ -922,8 +921,8 @@ function ability() {
     g.charges--; g.sprint = 1.8; g.inv = Math.max(g.inv, .4); sfx.sprint(); pop('Fırla!', px, GY - 170);
     if (g.hits) { g.hits = 0; g.recover = 0; banner('Hemen toparlandı!', 1.3); }
   } else {
-    if (g.proj || !g.ar.has) return nope('Yeni poğaça geliyor!');
-    g.proj = { t: 0, x0: g.arifHand[0], y0: g.arifHand[1], b: g.ar.bites }; g.ar.has = false; g.ar.reload = .8; g.throwT = .35;
+    if (g.proj || !g.ar.has) return nope('Arif yeni poğaça hazırlıyor!');
+    g.proj = { t: 0, x0: g.arifHand[0], y0: g.arifHand[1], b: g.ar.bites }; g.ar.has = false; g.ar.reload = g.ar.max = 6; g.throwT = .35;
     sfx.toss(); pop('Poğaça!', g.arifHand[0], g.arifHand[1] - 10);
   }
   updatePad();
@@ -932,11 +931,11 @@ function nope(msg) { sfx.nope(); pop(msg, PX + g.pxOff, GY - 200, '#ff9b9b'); }
 // Arif munches his poğaça whenever he is not throwing it; a fresh one appears when it is gone
 function arifEat(dt) {
   const A = g.ar;
-  if (!A.has) { A.reload -= dt; if (A.reload <= 0) { A.has = true; A.bites = 0; A.t = 0; A.cyc = -1; g.fx.push({ k: 'spark', x: g.arifHand[0] + 14, y: g.arifHand[1] - 12, vx: 0, vy: -50, a: 0, life: .5, r: 0 }); } return; }
+  if (!A.has) { A.reload -= dt; if (A.reload <= 0) { A.has = true; A.bites = 0; A.t = 0; A.cyc = -1; updatePad(); if (A.max > 1) pop('Poğaça hazır!', g.arifHand[0], g.arifHand[1] - 20, '#ffd23f'); g.fx.push({ k: 'spark', x: g.arifHand[0] + 14, y: g.arifHand[1] - 12, vx: 0, vy: -50, a: 0, life: .5, r: 0 }); } return; }
   if (g.throwT > 0 || g.duck) return;
   A.t += dt; const cyc = Math.floor(A.t / 1.7), u = (A.t % 1.7) / 1.7;
   if (u >= .34 && A.cyc !== cyc && A.bites < 3) { A.cyc = cyc; A.bites++; sfx.nom(); for (let j = 0; j < 5; j++) g.fx.push({ k: 'crumb', x: g.arifHand[0] + 4, y: g.arifHand[1] - 4, vx: -40 - Math.random() * 120, vy: -40 - Math.random() * 90, a: 0, life: .8 }); }
-  if (A.bites >= 3 && u >= .72) { A.has = false; A.reload = .5; }
+  if (A.bites >= 3 && u >= .72) { A.has = false; A.reload = A.max = .5; }
 }
 function spawn() {
   const s = g.score, pool = [['log', 3], ['rock', 3]];
@@ -944,6 +943,7 @@ function spawn() {
   if (s > 220) pool.push(['pteroLow', 2]);
   if (s > 300) pool.push(['pteroDuck', 2.2], ['vine', 1.6]);
   if (s > 500) pool.push(['logs', 1.5]);
+  if (s > 350) pool.push(['tower', 1.3]);
   let r = Math.random() * pool.reduce((a, b) => a + b[1], 0), type = 'log';
   for (const [k, w] of pool) { if ((r -= w) <= 0) { type = k; break; } }
   const o = { type, x: LW + 160, t: Math.random() * 6 };
@@ -957,6 +957,7 @@ function obsBox(o) {
     case 'log': return [x - 52, GY - 30, 104, 32];
     case 'logs': return [x - 52, GY - 62, 104, 64];
     case 'rock': return [x - 37, GY - 46, 74, 46];
+    case 'tower': return [x - 40, GY - 108, 80, 108];
     case 'baby': return [x - 40, GY - 56, 80, 56];
     case 'pteroLow': return [x - 52, GY - 88, 80, 30];
     case 'pteroDuck': return [x - 52, GY - 126, 80, 30];
@@ -969,7 +970,7 @@ function playerBox() {
 }
 function knock(o) {
   o.gone = true;
-  const col = { rock: '#8d8f99', baby: '#3fa7b5', pteroLow: '#c27350', pteroDuck: '#c27350', vine: '#3f8f3a' }[o.type] || '#8b5a2b', b = obsBox(o);
+  const col = { rock: '#8d8f99', tower: '#8d8f99', baby: '#3fa7b5', pteroLow: '#c27350', pteroDuck: '#c27350', vine: '#3f8f3a' }[o.type] || '#8b5a2b', b = obsBox(o);
   for (let k = 0; k < 7; k++) g.fx.push({ k: 'chunk', x: o.x, y: Math.max(b[1], 0) + b[3] / 2, vx: 120 + Math.random() * 380, vy: -300 - Math.random() * 450, a: 0, life: 1.2, c: col, r: Math.random() * 6 });
 }
 function stumble(o) {
@@ -995,8 +996,8 @@ function caught() {
 const TIPS = {
   all: ['Basılı tutarsan daha yükseğe zıplarsın.', 'Sarkan dallarda ve yüksekten uçan kuşlarda eğil.', 'Tökezledikten sonra ikinci kalp dolana kadar dikkatli ol.', 'Her 1000 puanda yeni bir dinozor ve yeni bir gökyüzü gelir.', 'Havadayken eğil tuşuna basarsan hızla yere inersin.'],
   dayi: ['Fırla, tökezledikten hemen sonra kullanınca kalbini anında doldurur.'],
-  dayiArif: ['Poğaçayı tökezledikten sonra at: dinozor yerken kalbin dolar.'],
-  asim: ['Önce zıpla, havadayken roketi ateşle: en yükseğe böyle çıkarsın.'],
+  dayiArif: ['Poğaçayı tökezledikten sonra at: dinozor yerken kalbin dolar. Yenisi 6 saniyede gelir.', 'Arif omzundayken Dayı biraz daha alçak zıplar.'],
+  asim: ['Önce zıpla, havadayken roketi ateşle: en yükseğe böyle çıkarsın.', 'Roket yanarken kuşlara ve dallara çarparsan onları devirirsin.', 'Altın poğaçalar çok yüksekte: zıpla + roket, +100 puan!'],
 };
 function showOver() {
   g.over = true;
@@ -1075,6 +1076,7 @@ function tutorial() {
     else if (!duck && (g.hintJump < 2 || o.hinted)) { if (!o.hinted) { o.hinted = true; g.hintJump++; } hintShow(touch ? 'Zıpla! (dokun)' : 'Zıpla! (Boşluk)', .3, 'jump'); }
     break;
   }
+  if (char === 'asim' && !g.hintGold) { const gb = g.buns.find(b => b.gold && b.x - px < g.speed * 1.3 && b.x > px); if (gb) { g.hintGold = true; hintShow('Altın poğaça! Zıpla + roket', 2, 'gold'); } }
   if (!g.hintAb && g.t > 9) { g.hintAb = true; hintShow(`Özel güç: ${C.abName} (${touch ? 'ortadaki düğme' : 'X'})`, 3.5, 'ab'); }
 }
 function update(dt) {
@@ -1105,7 +1107,7 @@ function update(dt) {
   if (!g.ground) {
     if (keys.duck) g.vy = Math.min(g.vy, -1200);
     g.holdT += dt;
-    const grav = g.superJ && g.vy > 0 ? 2400 : (g.hold && g.vy > 0 && g.holdT < .22 ? 1500 : 3000);
+    const grav = g.rocketT > 0 ? 1800 : g.superJ && g.vy > 0 ? 2400 : (g.hold && g.vy > 0 && g.holdT < .22 ? 1500 : 3000);
     g.vy -= grav * dt; g.y += g.vy * dt;
     if (g.superJ && Math.random() < .7) g.fx.push({ k: 'spark', x: PX + g.pxOff + (Math.random() - .5) * 40, y: GY - g.y - 20 - Math.random() * 60, vx: -60, vy: 30, a: 0, life: .55, r: Math.random() * 6 });
     const top = GY - 150; if (g.y > top) { g.y = top; g.vy = Math.min(g.vy, 0); }
@@ -1121,7 +1123,7 @@ function update(dt) {
   // spawning
   g.next -= g.speed * dt; if (g.next <= 0) spawn();
   g.nextBun -= g.speed * dt;
-  if (g.nextBun <= 0) { g.buns.push({ x: LW + 80, alt: Math.random() < .55 ? 150 : 40, t: Math.random() * 6 }); g.nextBun = 600 + Math.random() * 900; }
+  if (g.nextBun <= 0) { const gold = char === 'asim' && g.score > 60 && Math.random() < .4; g.buns.push({ x: LW + 80, alt: gold ? 380 : Math.random() < .55 ? 150 : 40, t: Math.random() * 6, gold }); g.nextBun = 600 + Math.random() * 900; }
   // obstacles
   const pb = playerBox(), D = DINOS[g.dino.type], tx = g.dino.x + D.foot * D.s + 20;
   for (const o of g.obs) {
@@ -1129,11 +1131,12 @@ function update(dt) {
     if (o.gone) continue;
     const b = obsBox(o), m = 8;
     if (g.inv <= 0 && pb[0] + m < b[0] + b[2] && pb[0] + pb[2] - m > b[0] && pb[1] + m < b[1] + b[3] && pb[1] + pb[3] > b[1] + m) {
+      if (g.rocketT > 0 && (o.type === 'pteroLow' || o.type === 'pteroDuck' || o.type === 'vine')) { knock(o); sfx.smash(); buzz(20); g.score += 30; g.shake = Math.max(g.shake, 6); pop('Roket çarpması! +30', o.x, Math.max(120, b[1] + 20), '#ffd23f'); continue; }
       if (g.hits === 0) stumble(o); else { knock(o); caught(); return; }
     }
-    if (!o.gone && o.x < tx && (o.type === 'log' || o.type === 'logs' || o.type === 'rock' || o.type === 'baby')) {
+    if (!o.gone && o.x < tx && (o.type === 'log' || o.type === 'logs' || o.type === 'rock' || o.type === 'baby' || o.type === 'tower')) {
       o.gone = true; sfx.smash(); g.shake = Math.max(g.shake, 7);
-      for (let k = 0; k < 7; k++) g.fx.push({ k: 'chunk', x: o.x, y: GY - 20, vx: -200 - Math.random() * 500, vy: -350 - Math.random() * 450, a: 0, life: 1.2, c: o.type === 'rock' ? '#8d8f99' : o.type === 'baby' ? '#3fa7b5' : '#8b5a2b', r: Math.random() * 6 });
+      for (let k = 0; k < 7; k++) g.fx.push({ k: 'chunk', x: o.x, y: GY - 20, vx: -200 - Math.random() * 500, vy: -350 - Math.random() * 450, a: 0, life: 1.2, c: o.type === 'rock' || o.type === 'tower' ? '#8d8f99' : o.type === 'baby' ? '#3fa7b5' : '#8b5a2b', r: Math.random() * 6 });
       g.fx.push({ k: 'puff', x: o.x, y: GY, a: 0, life: .6 });
     }
   }
@@ -1141,7 +1144,7 @@ function update(dt) {
   for (const b of g.buns) {
     b.x -= g.speed * dt; b.t += dt;
     const by = GY - b.alt;
-    if (!b.got && Math.abs(b.x - (PX + g.pxOff)) < 40 && by > pb[1] - 20 && by < pb[1] + pb[3] + 10) { b.got = true; g.nb++; g.score += 20; sfx.bun(); pop('+20', b.x, by); updatePad(); }
+    if (!b.got && Math.abs(b.x - (PX + g.pxOff)) < 40 && by > pb[1] - 20 && by < pb[1] + pb[3] + 10) { b.got = true; g.nb++; g.score += b.gold ? 100 : 20; sfx.bun(); if (b.gold) { sfx.mile(); buzz(20); for (let k = 0; k < 8; k++) g.fx.push({ k: 'spark', x: b.x, y: by, vx: (Math.random() - .5) * 260, vy: (Math.random() - .5) * 260, a: 0, life: .6, r: Math.random() * 6 }); } pop(b.gold ? 'Altın! +100' : '+20', b.x, by + (b.gold ? 60 : 0), b.gold ? '#ffd23f' : undefined); updatePad(); }
   }
   g.buns = g.buns.filter(b => b.x > -60 && !b.got);
   // tossed poğaça
@@ -1249,6 +1252,7 @@ function drawObs(o) {
     const one = (y, w) => { rrect(x - w / 2, y - 30, w, 32, 15); fs('#8b5a2b'); ell(x - w / 2 + 6, y - 14, 9, 15); fs('#e0ac72'); ell(x - w / 2 + 6, y - 14, 4, 7); X.lineWidth = 2; X.strokeStyle = '#a8743d'; X.stroke(); };
     one(GY + 2, 104); if (o.type === 'logs') one(GY - 30, 86);
   } else if (o.type === 'rock') { ell(x, GY - 20, 38, 26); fs('#8d8f99'); ell(x - 10, GY - 30, 13, 7); fill('#b7b9c2'); }
+  else if (o.type === 'tower') { for (const [dx, dy, rx, ry] of [[0, -22, 40, 24], [5, -60, 33, 21], [-2, -92, 25, 17]]) { ell(x + dx, GY + dy, rx, ry); fs('#8d8f99'); ell(x + dx - rx * .3, GY + dy - ry * .4, rx * .32, ry * .28); fill('#b7b9c2'); } }
   else if (o.type === 'baby') babyDino(x, GY + 2, o.t);
   else if (o.type === 'vine') vine(x, o.t);
   else { X.save(); X.translate(x, GY - (o.type === 'pteroLow' ? 70 : 108)); X.scale(.75, .75); ptero(0, 0, o.t * 11); X.restore(); }
@@ -1281,13 +1285,15 @@ function hud() {
     }
   }
   drawBun(132, 40, 1.15); X.textBaseline = 'top'; txt('× ' + g.nb, 154, 20, 'left');
-  const inf = C.ab === 'toss', n = inf ? 1 : g.charges;
-  star(34, 86, 13, 0); fs(n > 0 ? '#ffd23f' : '#c9c2b0', 2.6);
+  const ready = C.ab === 'toss' ? g.ar.has : C.ab === 'rocket' ? g.ground || !g.rocketUsed : g.charges > 0;
+  star(34, 86, 13, 0); fs(ready ? '#ffd23f' : '#c9c2b0', 2.6);
+  if (C.ab === 'toss' && !g.ar.has && g.ar.max > 1) { X.beginPath(); X.arc(34, 86, 19, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(1 - g.ar.reload / g.ar.max)); X.lineWidth = 4; X.strokeStyle = '#ffd23f'; X.stroke(); }
   X.textBaseline = 'middle'; txt(C.abName, 56, 86, 'left', 22);
   X.font = '800 22px "Baloo 2", Nunito, system-ui, sans-serif'; const wd = X.measureText(C.abName).width;
-  if (inf) txt('∞', 64 + wd, 84, 'left', 28);
-  else for (let i = 0; i < 3; i++) { ell(66 + wd + i * 22, 86, 7, 7); fs(i < n ? '#ffd23f' : 'rgba(255,255,255,.35)', 2.6); }
-  if (C.ab === 'rocket' && state === 'run' && !g.ground && !g.rocketUsed && g.charges > 0) txt('Roket hazır!', 136 + wd, 86, 'left', 18, '#ffd23f');
+  if (C.ab === 'toss') txt(g.ar.has ? '∞' : Math.ceil(g.ar.reload) + ' sn', 64 + wd, 85, 'left', g.ar.has ? 28 : 20);
+  else if (C.ab === 'rocket') { ell(70 + wd, 86, 7, 7); fs(ready ? '#ffd23f' : 'rgba(255,255,255,.35)', 2.6); }
+  else for (let i = 0; i < 3; i++) { ell(66 + wd + i * 22, 86, 7, 7); fs(i < g.charges ? '#ffd23f' : 'rgba(255,255,255,.35)', 2.6); }
+  if (C.ab === 'rocket' && state === 'run' && !g.ground && !g.rocketUsed) txt('Roket hazır!', 90 + wd, 86, 'left', 18, '#ffd23f');
   if (g.banner) {
     const b = g.banner, a = clamp(Math.min(b.t / .15, (b.dur - b.t) / .3));
     if (a > 0) {
@@ -1312,7 +1318,11 @@ function draw() {
   }
   for (const f of g.fx) if (f.k === 'puff') { LWO = 3; puff(f.x, f.y, f.a, f.life, f.sz || 1); }
   for (const o of g.obs) if (!o.gone) drawObs(o);
-  for (const b of g.buns) { const y = GY - b.alt + Math.sin(b.t * 5) * 6; ell(b.x, y, 34, 34); fill('rgba(255,236,160,.5)'); LWO = 3; drawPogaca(b.x, y, 1.6); }
+  for (const b of g.buns) {
+    const y = GY - b.alt + Math.sin(b.t * 5) * 6;
+    if (b.gold) { ell(b.x, y, 46, 46); fill('rgba(255,210,63,.45)'); LWO = 3; drawPogaca(b.x, y, 1.8); ell(b.x, y - 2, 30, 22); fill('rgba(255,205,40,.38)'); for (let k = 0; k < 3; k++) { const a = b.t * 3 + k * 2.1; star(b.x + Math.cos(a) * 44, y + Math.sin(a) * 30, 8, b.t * 5); fs('#fff3a0', 2); } }
+    else { ell(b.x, y, 34, 34); fill('rgba(255,236,160,.5)'); LWO = 3; drawPogaca(b.x, y, 1.6); }
+  }
   if (g.proj) {
     const p = g.proj, m = mouthWorld(g.dino), k = p.t, cx = (p.x0 + m[0]) / 2, cy = Math.min(p.y0, m[1]) - 150;
     const x = (1 - k) ** 2 * p.x0 + 2 * (1 - k) * k * cx + k * k * m[0], y = (1 - k) ** 2 * p.y0 + 2 * (1 - k) * k * cy + k * k * m[1];
